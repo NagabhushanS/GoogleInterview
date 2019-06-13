@@ -1,0 +1,44 @@
+1. Dynamic Programming
+   a. Bitmask
+   b. lr dp
+   c. Knapsack dp
+   d. Trees dp
+2. Graph Theory
+   a. DFS, BFS
+   b. Cycle Detection, Bipartite Graph, 
+   c. Topological Sorting
+   d. MST
+   e. Shortest Paths: Dijsktras and Floyd Warshall
+3. Data Structures
+   a. LinkedList, ArrayList
+   b. Stacks and Queues
+   c. Min heaps and PQ
+   d. BST and AVL or RB trees
+   e. Tries
+   f. Hash Tables
+   g. DSU
+4. Sorting
+   a. Selection and Insertion Sort
+   b. Merge Sort and Quick Sort
+   c. Heap Sort
+   d. Median and Order Statistics
+   e. Binary Search
+5. Strings
+   a. Radix Sorting, LSD and MSD sorts
+   b. Substring search, KMP
+   c. Robin Karp
+   d. Suffix Trees and Arrays
+6. Maths
+   a. Computational Geometry
+   b. Prime numbers and euclids algorithm, SOE
+   c. Numbers theory, Modular Arithmetic, GCD, etc
+   d. Euler's totient function.
+6. Miscallaneous and Complex Algorithms
+   a. NP Completeness
+   b. Approx algorithms
+   c. Segment Trees and BIT
+   d. LCA
+   e. Flows
+   f. FFT
+   g. KD Trees
+   

@@ -37,7 +37,7 @@ class DSU {
 			id[i]=j;
 			size[j]+=size[i];
 		}
-		id[i]=j;
+		
 	}
 	
 }

@@ -10,10 +10,26 @@ import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.PriorityQueue;
 
-public class P1076D {
-	static class Edge{
-		int u, v;
-		int w;
+public class P938D {
+	
+	private static class Node implements Comparable<Node>{
+		private int u;
+		private int watch;
+		private long dist;
+		
+		public Node(int a, int b, long c) {
+			u=a;
+			watch=b;
+			dist=c;
+		}
+		
+		public int compareTo(Node node) {
+			return Long.compare(dist, node.dist);
+		}
+	}
+	
+	private static class Edge{
+		private int u, v, w;
 		
 		public Edge(int a, int b, int c) {
 			u=a;
@@ -21,106 +37,85 @@ public class P1076D {
 			w=c;
 		}
 		
-		public int hashCode() {
-			return u+v;
+		public int other(int x) {
+			return x==u?v:u;
 		}
-		
-		public boolean equals(Object o) {
-			Edge e = (Edge)o;
-			return (u==e.u && v==e.v || u==e.v && v==e.u);
-		}
-		
 	}
 	
-	static class Node implements Comparable<Node>{
-		int u;
-		long dist;
-		
-		public Node(int a, long d) {
-			u=a;
-			dist=d;
-		}
-		
-		public int compareTo(Node node) {
-			return Long.compare(dist, node.dist);
-		}
-	
-	}
-	
-	static int n, m, k;
-	static HashMap<Integer, ArrayList<Edge>> g = new HashMap<>();
-	static HashMap<Edge, Integer> edgeMap = new HashMap<>();
+	private static int n, m;
+	private static HashMap<Integer, ArrayList<Edge>> g;
+	static int[] a;
 
 	public static void main(String[] args) {
 		InputReader in = new InputReader(System.in);
-		PrintWriter w2 = new PrintWriter(System.out);
+		PrintWriter w = new PrintWriter(System.out);
 		n = in.nextInt();
 		m = in.nextInt();
-		k = in.nextInt();
-		
+		g = new HashMap<>();
 		for(int i=0; i<n; i++) g.put(i, new ArrayList<>());
-		
 		for(int i=0; i<m; i++) {
 			int p = in.nextInt()-1;
 			int q = in.nextInt()-1;
-			int w = in.nextInt();
-			Edge e = new Edge(p, q, w);
+			int ww = 2*in.nextInt();
+			Edge e = new Edge(p, q, ww);
 			g.get(p).add(e);
 			g.get(q).add(e);
-			edgeMap.put(e, (i+1));
 		}
+		a = new int[n];
+		for(int i=0; i<n; i++) a[i] = in.nextInt();
+		
+		long[][] dist = new long[n][2];
+		for(int i=0; i<n; i++) Arrays.fill(dist[i], (long)1e15);
 		
 		PriorityQueue<Node> pq = new PriorityQueue<>();
-		pq.add(new Node(0, 0));
-		
 		HashSet<Integer> relaxed = new HashSet<>();
-		long[] dist = new long[n];
-		Arrays.fill(dist, (long)1e15);
-		dist[0]=0;
-		int[] par = new int[n];
-		Arrays.fill(par, -1);
-		int count=0;
-		ArrayList<Integer> finalNodes = new ArrayList<>();
+		
+		for(int i=0; i<n; i++) {
+			dist[i][1] = a[i];
+			pq.add(new Node(i, 1, a[i]));
+		}
+		
 		while(!pq.isEmpty()) {
 			Node node = pq.poll();
 			int u = node.u;
+//			if (node.watch==1) continue;
 			
 			if (relaxed.contains(u)) continue;
 			relaxed.add(u);
-			count++;
-			finalNodes.add(u);
-			if (count==k+1) {
-				break;
-			}
 			
 			for(Edge e: g.get(u)) {
-				int v = e.u==u?e.v:	e.u;
-				if (dist[v]>dist[u]+e.w) {
-					dist[v] = dist[u]+e.w;
-					pq.add(new Node(v, dist[v]));
-					par[v] = u;
+				int v = e.other(u);
+				
+//				if (dist[v][1]>node.dist+e.w+a[v]) {
+//					System.out.println("HELLO");
+//					dist[v][1] = node.dist+e.w+a[v];
+//					pq.add(new Node(v, 1, dist[v][1]));
+//				}
+				if (dist[v][1]>node.dist+e.w) {
+//					System.out.println("HELLO");
+					dist[v][1] = node.dist+e.w;
+					pq.add(new Node(v, 1, dist[v][1]));
 				}
 			}
 		}
-		w2.println(Math.min(n-1, k));
-		for(int i: finalNodes) {
-			if (par[i]!=-1) {
-				w2.print(edgeMap.get(new Edge(i, par[i], 0))+" ");
-			}
+		
+		for(int i=0; i<n; i++) {
+			w.print(dist[i][1]+" ");
 		}
-		w2.flush();
+		w.println();
+		w.flush();
 	}
 	
 	static class InputReader {
-
+		 
 		private final InputStream stream;
 		private final byte[] buf = new byte[8192];
 		private int curChar, snumChars;
-
+ 
 		public InputReader(InputStream st) {
 			this.stream = st;
 		}
-
+ 
 		public int read() {
 			if (snumChars == -1)
 				throw new InputMismatchException();
@@ -136,7 +131,7 @@ public class P1076D {
 			}
 			return buf[curChar++];
 		}
-
+ 
 		public int nextInt() {
 			int c = read();
 			while (isSpaceChar(c)) {
@@ -155,7 +150,7 @@ public class P1076D {
 			} while (!isSpaceChar(c));
 			return res * sgn;
 		}
-
+ 
 		public long nextLong() {
 			int c = read();
 			while (isSpaceChar(c)) {
@@ -174,7 +169,7 @@ public class P1076D {
 			} while (!isSpaceChar(c));
 			return res * sgn;
 		}
-
+ 
 		public int[] nextIntArray(int n) {
 			int a[] = new int[n];
 			for (int i = 0; i < n; i++) {
@@ -182,7 +177,7 @@ public class P1076D {
 			}
 			return a;
 		}
-
+ 
 		public String readString() {
 			int c = read();
 			while (isSpaceChar(c)) {
@@ -195,7 +190,7 @@ public class P1076D {
 			} while (!isSpaceChar(c));
 			return res.toString();
 		}
-
+ 
 		public String nextLine() {
 			int c = read();
 			while (isSpaceChar(c))
@@ -207,15 +202,15 @@ public class P1076D {
 			} while (!isEndOfLine(c));
 			return res.toString();
 		}
-
+ 
 		public boolean isSpaceChar(int c) {
 			return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == -1;
 		}
-
+ 
 		private boolean isEndOfLine(int c) {
 			return c == '\n' || c == '\r' || c == -1;
 		}
-
+ 
 	}
-	
+
 }

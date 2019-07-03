@@ -3,124 +3,101 @@ package Graphs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.InputMismatchException;
-import java.util.PriorityQueue;
+import java.util.Queue;
 
-public class P1076D {
-	static class Edge{
-		int u, v;
-		int w;
-		
-		public Edge(int a, int b, int c) {
-			u=a;
-			v=b;
-			w=c;
-		}
-		
-		public int hashCode() {
-			return u+v;
-		}
-		
-		public boolean equals(Object o) {
-			Edge e = (Edge)o;
-			return (u==e.u && v==e.v || u==e.v && v==e.u);
-		}
-		
-	}
-	
-	static class Node implements Comparable<Node>{
-		int u;
-		long dist;
-		
-		public Node(int a, long d) {
-			u=a;
-			dist=d;
-		}
-		
-		public int compareTo(Node node) {
-			return Long.compare(dist, node.dist);
-		}
-	
-	}
-	
-	static int n, m, k;
-	static HashMap<Integer, ArrayList<Edge>> g = new HashMap<>();
-	static HashMap<Edge, Integer> edgeMap = new HashMap<>();
+public class P986A {
 
+	private static int n, m, k, s;
+	private static HashMap<Integer, ArrayList<Integer>> g;
+	private static HashMap<Integer, ArrayList<Integer>> typeToTown;
+	
 	public static void main(String[] args) {
 		InputReader in = new InputReader(System.in);
-		PrintWriter w2 = new PrintWriter(System.out);
+		PrintWriter w = new PrintWriter(System.out);
+		
 		n = in.nextInt();
 		m = in.nextInt();
 		k = in.nextInt();
+		s = in.nextInt();
 		
-		for(int i=0; i<n; i++) g.put(i, new ArrayList<>());
+		g = new HashMap<>();
+		typeToTown = new HashMap<>();
+		
+		for(int i=0; i<n; i++) {
+			g.put(i, new ArrayList<>());
+			if (i<k) typeToTown.put(i, new ArrayList<Integer>());
+		}
+		
+		for(int i=0; i<n; i++) {
+			int type = in.nextInt()-1;
+			typeToTown.get(type).add(i);
+		}
 		
 		for(int i=0; i<m; i++) {
 			int p = in.nextInt()-1;
 			int q = in.nextInt()-1;
-			int w = in.nextInt();
-			Edge e = new Edge(p, q, w);
-			g.get(p).add(e);
-			g.get(q).add(e);
-			edgeMap.put(e, (i+1));
+			g.get(p).add(q);
+			g.get(q).add(p);
 		}
 		
-		PriorityQueue<Node> pq = new PriorityQueue<>();
-		pq.add(new Node(0, 0));
+		int[][] dist = new int[n][k];
+		for(int i=0; i<n; i++) {
+			Arrays.fill(dist[i], (int)1e9);
+		}
 		
-		HashSet<Integer> relaxed = new HashSet<>();
-		long[] dist = new long[n];
-		Arrays.fill(dist, (long)1e15);
-		dist[0]=0;
-		int[] par = new int[n];
-		Arrays.fill(par, -1);
-		int count=0;
-		ArrayList<Integer> finalNodes = new ArrayList<>();
-		while(!pq.isEmpty()) {
-			Node node = pq.poll();
-			int u = node.u;
-			
-			if (relaxed.contains(u)) continue;
-			relaxed.add(u);
-			count++;
-			finalNodes.add(u);
-			if (count==k+1) {
-				break;
+		boolean[] mark = new boolean[n];
+		Queue<Integer> queue = new ArrayDeque<>();
+		
+		for(int type=0; type<k; type++) {
+			Arrays.fill(mark, false);
+			for(int x: typeToTown.get(type)) {
+				queue.add(x);
+				dist[x][type]=0;
+				mark[x]=true;
 			}
-			
-			for(Edge e: g.get(u)) {
-				int v = e.u==u?e.v:	e.u;
-				if (dist[v]>dist[u]+e.w) {
-					dist[v] = dist[u]+e.w;
-					pq.add(new Node(v, dist[v]));
-					par[v] = u;
+			while(!queue.isEmpty()) {
+				int u = queue.poll();
+				
+				for(int v: g.get(u)) {
+					if (mark[v]) continue;
+					queue.add(v);
+					mark[v]=true;
+					dist[v][type] = dist[u][type]+1;
 				}
 			}
+			
+			
 		}
-		w2.println(Math.min(n-1, k));
-		for(int i: finalNodes) {
-			if (par[i]!=-1) {
-				w2.print(edgeMap.get(new Edge(i, par[i], 0))+" ");
+		
+		for(int i=0; i<n; i++) {
+			int[] distances = dist[i];
+			int cost=0;
+			Arrays.sort(distances);
+			for(int j=0; j<s; j++) {
+				cost+=distances[j];
 			}
+			w.print(cost+" ");
 		}
-		w2.flush();
+		w.println();
+		w.flush();
+
 	}
 	
 	static class InputReader {
-
+		 
 		private final InputStream stream;
 		private final byte[] buf = new byte[8192];
 		private int curChar, snumChars;
-
+ 
 		public InputReader(InputStream st) {
 			this.stream = st;
 		}
-
+ 
 		public int read() {
 			if (snumChars == -1)
 				throw new InputMismatchException();
@@ -136,7 +113,7 @@ public class P1076D {
 			}
 			return buf[curChar++];
 		}
-
+ 
 		public int nextInt() {
 			int c = read();
 			while (isSpaceChar(c)) {
@@ -155,7 +132,7 @@ public class P1076D {
 			} while (!isSpaceChar(c));
 			return res * sgn;
 		}
-
+ 
 		public long nextLong() {
 			int c = read();
 			while (isSpaceChar(c)) {
@@ -174,7 +151,7 @@ public class P1076D {
 			} while (!isSpaceChar(c));
 			return res * sgn;
 		}
-
+ 
 		public int[] nextIntArray(int n) {
 			int a[] = new int[n];
 			for (int i = 0; i < n; i++) {
@@ -182,7 +159,7 @@ public class P1076D {
 			}
 			return a;
 		}
-
+ 
 		public String readString() {
 			int c = read();
 			while (isSpaceChar(c)) {
@@ -195,7 +172,7 @@ public class P1076D {
 			} while (!isSpaceChar(c));
 			return res.toString();
 		}
-
+ 
 		public String nextLine() {
 			int c = read();
 			while (isSpaceChar(c))
@@ -207,15 +184,15 @@ public class P1076D {
 			} while (!isEndOfLine(c));
 			return res.toString();
 		}
-
+ 
 		public boolean isSpaceChar(int c) {
 			return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == -1;
 		}
-
+ 
 		private boolean isEndOfLine(int c) {
 			return c == '\n' || c == '\r' || c == -1;
 		}
-
+ 
 	}
-	
+
 }

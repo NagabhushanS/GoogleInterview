@@ -40,7 +40,6 @@ class SegmentTree{
 			return seg[pos];
 		} else {
 			count++;
-			System.out.println("HERE");
 			int mid = (low+high)/2;
 			return Math.min(getMinimum(2*pos+1, low, mid, qlow, qhigh), getMinimum(2*pos+2, mid+1, high, qlow, qhigh));
 				

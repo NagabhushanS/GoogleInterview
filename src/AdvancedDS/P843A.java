@@ -1,114 +1,103 @@
-package Graphs;
+package AdvancedDS;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.InputMismatchException;
-import java.util.PriorityQueue;
+import java.util.Map.Entry;
+import java.util.TreeSet;
 
-public class P1076D {
-	static class Edge{
-		int u, v;
-		int w;
+public class P843A {
+
+	static class Point implements Comparable<Point>{
+		int i;
+		int v;
 		
-		public Edge(int a, int b, int c) {
-			u=a;
+		public Point(int a, int b) {
+			i=a;
 			v=b;
-			w=c;
 		}
-		
-		public int hashCode() {
-			return u+v;
-		}
-		
-		public boolean equals(Object o) {
-			Edge e = (Edge)o;
-			return (u==e.u && v==e.v || u==e.v && v==e.u);
-		}
-		
-	}
-	
-	static class Node implements Comparable<Node>{
-		int u;
-		long dist;
-		
-		public Node(int a, long d) {
-			u=a;
-			dist=d;
-		}
-		
-		public int compareTo(Node node) {
-			return Long.compare(dist, node.dist);
-		}
-	
-	}
-	
-	static int n, m, k;
-	static HashMap<Integer, ArrayList<Edge>> g = new HashMap<>();
-	static HashMap<Edge, Integer> edgeMap = new HashMap<>();
 
+		@Override
+		public int compareTo(Point o) {
+			return v-o.v;
+		}
+	}
+	
+	static int n;
+	static int[] a;
+	static Point[] b;
+	static int[] id;
+	static int[] size;
+	static int components;
+	
+	
 	public static void main(String[] args) {
 		InputReader in = new InputReader(System.in);
-		PrintWriter w2 = new PrintWriter(System.out);
+		PrintWriter w = new PrintWriter(System.out);
 		n = in.nextInt();
-		m = in.nextInt();
-		k = in.nextInt();
-		
-		for(int i=0; i<n; i++) g.put(i, new ArrayList<>());
-		
-		for(int i=0; i<m; i++) {
-			int p = in.nextInt()-1;
-			int q = in.nextInt()-1;
-			int w = in.nextInt();
-			Edge e = new Edge(p, q, w);
-			g.get(p).add(e);
-			g.get(q).add(e);
-			edgeMap.put(e, (i+1));
+		a = new int[n];
+		b = new Point[n];
+		for(int i=0; i<n; i++) {
+			a[i] = in.nextInt();
+			b[i] = new Point(i, a[i]);
 		}
 		
-		PriorityQueue<Node> pq = new PriorityQueue<>();
-		pq.add(new Node(0, 0));
+		id = new int[n];
+		size = new int[n];
+		components = n;
+		Arrays.fill(size, 1);
+		for(int i=0; i<n; i++) id[i] = i;
 		
-		HashSet<Integer> relaxed = new HashSet<>();
-		long[] dist = new long[n];
-		Arrays.fill(dist, (long)1e15);
-		dist[0]=0;
-		int[] par = new int[n];
-		Arrays.fill(par, -1);
-		int count=0;
-		ArrayList<Integer> finalNodes = new ArrayList<>();
-		while(!pq.isEmpty()) {
-			Node node = pq.poll();
-			int u = node.u;
-			
-			if (relaxed.contains(u)) continue;
-			relaxed.add(u);
-			count++;
-			finalNodes.add(u);
-			if (count==k+1) {
-				break;
-			}
-			
-			for(Edge e: g.get(u)) {
-				int v = e.u==u?e.v:	e.u;
-				if (dist[v]>dist[u]+e.w) {
-					dist[v] = dist[u]+e.w;
-					pq.add(new Node(v, dist[v]));
-					par[v] = u;
-				}
-			}
+		Arrays.sort(b);
+		
+		for(int i=0; i<n; i++) {
+			if (a[i]==b[i].v) continue;
+			if (!connected(i, b[i].i)) union(i, b[i].i);
 		}
-		w2.println(Math.min(n-1, k));
-		for(int i: finalNodes) {
-			if (par[i]!=-1) {
-				w2.print(edgeMap.get(new Edge(i, par[i], 0))+" ");
-			}
+
+		System.out.println(components);
+		
+		HashMap<Integer, TreeSet<Integer>> comps = new HashMap<>();
+		
+		for(int i=0; i<n; i++) {
+			if (!comps.containsKey(root(i))) {
+				comps.put(root(i), new TreeSet<>());
+			} 
+			comps.get(root(i)).add(i);
 		}
-		w2.flush();
+		
+		for(Entry<Integer, TreeSet<Integer>> e: comps.entrySet()) {
+			w.print(e.getValue().size()+" ");
+			for(int x: e.getValue()) {
+				w.print((x+1)+" ");
+			}
+			w.print("\n");
+		}
+		w.flush();
+	}
+	
+	private static void union(int u, int v) {
+		components--;
+		int p = root(u);
+		int q = root(v);
+		id[p] = q;
+		size[q]+=size[p];
+		
+	}
+	
+	private static int root(int u) {
+		while(u!=id[u]) {
+			id[u] = id[id[u]];
+			u = id[u];
+		}
+		return u;
+	}
+	
+	private static boolean connected(int u, int v) {
+		return root(u)==root(v);
 	}
 	
 	static class InputReader {
@@ -217,5 +206,5 @@ public class P1076D {
 		}
 
 	}
-	
+
 }
